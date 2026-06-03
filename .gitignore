@@ -1,0 +1,7 @@
+.vscode/
+.settings/
+*.o
+*.out
+*.app
+.DS_Store
+eim_config.toml
