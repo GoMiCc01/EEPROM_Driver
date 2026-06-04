@@ -40,7 +40,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-extern nvm_api_t api;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
