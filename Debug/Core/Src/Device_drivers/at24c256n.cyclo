@@ -1,1 +1,4 @@
-../Core/Src/Device_drivers/at24c256n.c:4:18:_init	1
+../Core/Src/Device_drivers/at24c256n.c:4:18:init_low	1
+../Core/Src/Device_drivers/at24c256n.c:7:18:read_low	1
+../Core/Src/Device_drivers/at24c256n.c:10:18:write_low	1
+../Core/Src/Device_drivers/at24c256n.c:13:18:erase_all_low	1

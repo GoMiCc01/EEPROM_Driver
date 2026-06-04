@@ -40,8 +40,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
-nvm_api_t hnvm1;
-nvm_api_t hnvm2;
+extern nvm_api_t api;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -70,16 +69,21 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	uint8_t array[120] = {0};
+	//uint8_t array[120] = {0};
 	const nvm_device_api_handle my_device1 = {
 			.hi2c = &hi2c1,
 			.device_address = 0x50,
 			.device_page_size = 64,
 			.device_mem_capacity = 32768
 	};
-	hnvm1.init(&my_device1);
-	hnvm1.read(&my_device1, array);
-	hnvm1.write(&my_device1, (const uint8_t*)array);
+	const nvm_device_api_handle my_device2 = {
+				.hi2c = &hi2c1,
+				.device_address = 0x50,
+				.device_page_size = 64,
+				.device_mem_capacity = 32768
+		};
+	api.init(&my_device1);
+	api.init(&my_device2);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
