@@ -69,21 +69,17 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 
-	const nvm_device_api_handle my_device1 = {
+	nvm_device_api_handle my_device1 = {
 			.hi2c = &hi2c1,
 			.device_address = 0x50,
-			.device_page_size = 64,
-			.device_mem_capacity = 32768
 	};
-	const nvm_device_api_handle my_device2 = {
+	nvm_device_api_handle my_device2 = {
 			.hi2c = &hi2c1,
 			.device_address = 0x50,
-			.device_page_size = 64,
-			.device_mem_capacity = 32768
 	};
 	//uint8_t array[120] = {0};
-	api.init(&my_device1);
-	api.init(&my_device2);
+	api.init(&my_device1, NVM_API_STATUS_DO_NOT_FORMAT);
+	api.init(&my_device2, NVM_API_STATUS_DO_NOT_FORMAT);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/

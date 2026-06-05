@@ -61,8 +61,8 @@ all: main-build
 main-build: eeprom_driver_group_project.elf secondary-outputs
 
 # Tool invocations
-eeprom_driver_group_project.elf eeprom_driver_group_project.map: $(OBJS) $(USER_OBJS) /home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "eeprom_driver_group_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="eeprom_driver_group_project.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+eeprom_driver_group_project.elf eeprom_driver_group_project.map: $(OBJS) $(USER_OBJS) C:\Users\igory\Desktop\EEPROM_Driver\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "eeprom_driver_group_project.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\igory\Desktop\EEPROM_Driver\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="eeprom_driver_group_project.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

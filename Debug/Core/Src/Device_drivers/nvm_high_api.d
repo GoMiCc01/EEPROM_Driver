@@ -1,8 +1,8 @@
 Core/Src/Device_drivers/nvm_high_api.o: \
  ../Core/Src/Device_drivers/nvm_high_api.c \
- /home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/nvm_high_api.h \
- /home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/at24c256n.h \
- /home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/nvm_api.h \
+ C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/nvm_high_api.h \
+ C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/at24c256n.h \
+ C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/nvm_api.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -31,9 +31,9 @@ Core/Src/Device_drivers/nvm_high_api.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-/home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/nvm_high_api.h:
-/home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/at24c256n.h:
-/home/gomicc/main/embedded_road/ektos/eeprom_driver_group_project/Core/Inc/Device_drivers/nvm_api.h:
+C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/nvm_high_api.h:
+C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/at24c256n.h:
+C:/Users/igory/Desktop/EEPROM_Driver/Core/Inc/Device_drivers/nvm_api.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
