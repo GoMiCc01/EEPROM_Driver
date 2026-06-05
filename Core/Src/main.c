@@ -68,7 +68,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	//uint8_t array[120] = {0};
+
 	const nvm_device_api_handle my_device1 = {
 			.hi2c = &hi2c1,
 			.device_address = 0x50,
@@ -76,11 +76,12 @@ int main(void)
 			.device_mem_capacity = 32768
 	};
 	const nvm_device_api_handle my_device2 = {
-				.hi2c = &hi2c1,
-				.device_address = 0x50,
-				.device_page_size = 64,
-				.device_mem_capacity = 32768
-		};
+			.hi2c = &hi2c1,
+			.device_address = 0x50,
+			.device_page_size = 64,
+			.device_mem_capacity = 32768
+	};
+	//uint8_t array[120] = {0};
 	api.init(&my_device1);
 	api.init(&my_device2);
   /* USER CODE END 1 */

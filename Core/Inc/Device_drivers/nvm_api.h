@@ -1,5 +1,4 @@
-#ifndef INC_DEVICE_DRIVERS_NVM_API_H_
-#define INC_DEVICE_DRIVERS_NVM_API_H_
+#pragma once
 
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
@@ -16,7 +15,7 @@ typedef enum
 	NVM_API_STATUS_GET_DATA_ERROR,
 	NVM_API_STATUS_NO_DATA,
 	NVM_API_STATUS_CORRUPTED_MEMORY,
-	NVM_API_STATUS_INVALID_PARAMETERS,
+	NVM_API_STATUS_INVALID_PARAMETERS
 } nvm_api_status_t;
 
 typedef struct
@@ -28,4 +27,3 @@ typedef struct
 } nvm_device_api_handle;
 
 
-#endif /* INC_DEVICE_DRIVERS_NVM_API_H_ */
