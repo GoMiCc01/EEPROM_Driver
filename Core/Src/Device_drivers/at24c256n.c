@@ -4,6 +4,7 @@
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
 
 static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
+	at24c256n_wait_for_ready(wl_handle);
 	return NVM_DEVICE_STATUS_OK; //!
 }
 static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size){
