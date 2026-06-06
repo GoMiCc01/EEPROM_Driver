@@ -1,3 +1,0 @@
-../Core/Src/Device_drivers/nvm_high_api.c:6:30:init	16	static
-../Core/Src/Device_drivers/nvm_high_api.c:9:30:read	16	static
-../Core/Src/Device_drivers/nvm_high_api.c:12:30:write	16	static

@@ -1,3 +1,0 @@
-../Core/Src/Device_drivers/nvm_high_api.c:6:30:init	1
-../Core/Src/Device_drivers/nvm_high_api.c:9:30:read	1
-../Core/Src/Device_drivers/nvm_high_api.c:12:30:write	1

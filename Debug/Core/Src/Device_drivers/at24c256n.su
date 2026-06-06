@@ -1,5 +1,0 @@
-../Core/Src/Device_drivers/at24c256n.c:4:28:init_low	16	static
-../Core/Src/Device_drivers/at24c256n.c:7:28:read_low	24	static
-../Core/Src/Device_drivers/at24c256n.c:10:28:write_low	24	static
-../Core/Src/Device_drivers/at24c256n.c:13:28:erase_all_low	16	static
-../Core/Src/Device_drivers/at24c256n.c:16:28:search_last_busy_page	16	static
