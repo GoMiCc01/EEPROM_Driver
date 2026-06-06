@@ -13,7 +13,7 @@ static nvm_device_status_t write_low 		(nvm_device_api_handle *const wl_handle, 
 static nvm_device_status_t erase_all_low 	(nvm_device_api_handle *const wl_handle){
 	return NVM_DEVICE_STATUS_OK;
 }
-static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle){
+static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
 	return NVM_DEVICE_STATUS_OK;
 }
 
