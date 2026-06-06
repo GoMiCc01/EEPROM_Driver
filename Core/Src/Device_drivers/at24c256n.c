@@ -1,27 +1,26 @@
 
 #include "at24c256n.h"
 
-static void f();
+static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
 
 static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
-	f();
-	return NVM_DEVICE_STATUS_OK;
+	return NVM_DEVICE_STATUS_OK; //!
 }
 static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size){
 	return NVM_DEVICE_STATUS_OK;
 }
 static nvm_device_status_t write_low 		(nvm_device_api_handle *const wl_handle, const uint8_t *const data, const uint16_t size){
-	return NVM_DEVICE_STATUS_OK;
+	return NVM_DEVICE_STATUS_OK; //!
 }
 static nvm_device_status_t erase_all_low 	(nvm_device_api_handle *const wl_handle){
-	return NVM_DEVICE_STATUS_OK;
+	return NVM_DEVICE_STATUS_OK; //!
 }
 static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
 	return NVM_DEVICE_STATUS_OK;
 }
 
-static void f(){
-
+static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle) {
+    return HAL_I2C_IsDeviceReady(wl_handle->hi2c, wl_handle->device_address, 100, 100);
 }
 
 nvm_device_api_t api_low = {
