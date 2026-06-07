@@ -38,6 +38,7 @@ typedef struct
 	uint8_t last_busy_page;
 	uint8_t device_mem_page;
 	uint16_t device_mem_capacity;
+	uint8_t is_device_initialized;
 } nvm_device_api_handle;
 
 
