@@ -9,7 +9,7 @@ static nvm_data_cache data_cache;
 static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_formatting_status_t format)
 {
 	// 0) Verify parameters
-	if (wl_handle->hi2c == NULL || wl_handle->device_address == NULL)
+	if (wl_handle->hi2c == NULL || wl_handle->device_address == 0)
 	{
 		return NVM_API_STATUS_INVALID_PARAMETERS;
 	}
