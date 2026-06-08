@@ -5,7 +5,7 @@ static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle);
 static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size);
 static nvm_device_status_t write_low		(nvm_device_api_handle *const wl_handle, const uint8_t *const data, const uint16_t size);
 static nvm_device_status_t erase_all_low 	(nvm_device_api_handle *const wl_handle);
-static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle, const uint16_t size);
+static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *const wl_handle, const uint16_t size);
 static HAL_StatusTypeDef at24c256n_wait_for_ready	(nvm_device_api_handle *const wl_handle);
 
 
@@ -129,39 +129,46 @@ static nvm_device_status_t erase_all_low		(nvm_device_api_handle *const wl_handl
 	return NVM_DEVICE_STATUS_OK;
 }
 
-static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
+static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
 
-	if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
-	{
-		return NVM_DEVICE_STATUS_NOT_CONNECTED;
-	}
-
-    uint8_t byte;
-    uint32_t last_written = 0xFFFF;
-
-    for (uint32_t addr = 0; addr < wl_handle->device_mem_capacity; addr++)
+    if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
     {
+        return NVM_DEVICE_STATUS_NOT_CONNECTED;
+    }
+
+    uint8_t buffer[wl_handle->device_mem_page];
+    uint16_t pages = wl_handle->device_mem_capacity / wl_handle->device_mem_page;
+
+    uint16_t last_written = 0xFFFF;
+
+    for (uint16_t page = 0; page < pages; page++)
+    {
+        uint16_t addr = page * wl_handle->device_mem_page;
+
         if (HAL_I2C_Mem_Read(
                 wl_handle->hi2c,
                 wl_handle->device_address,
                 addr,
                 I2C_MEMADD_SIZE_16BIT,
-                &byte,
-                1,
+                buffer,
+                wl_handle->device_mem_page,
                 100) != HAL_OK)
         {
             return NVM_DEVICE_STATUS_READ_ERROR;
         }
 
-        if (byte != 0xFF)
+        for (uint16_t i = 0; i < wl_handle->device_mem_page; i++)
         {
-            last_written = addr;
+            if (buffer[i] != 0xFF)
+            {
+                last_written = addr + i;
+            }
         }
     }
 
     if (last_written == 0xFFFF)
     {
-        wl_handle->last_busy_struct_address = 0;
+        wl_handle->last_busy_struct_address = 0xFFFF;
         return NVM_DEVICE_STATUS_OK;
     }
 
@@ -179,5 +186,5 @@ nvm_device_api_t api_low = {
 		.read = read_low,
 		.write = write_low,
 		.erase_all = erase_all_low,
-		.search_last_busy_page = search_last_busy_page,
+		.last_busy_struct_address = last_busy_struct_address,
 };
