@@ -2,6 +2,9 @@
 
 #include "nvm_api.h"
 
+#define MEMADD_SIZE I2C_MEMADD_SIZE_16BIT
+#define TIMEOUT 10
+
 typedef struct
 {
 	nvm_device_status_t (*init)  (nvm_device_api_handle *const wl_handle);

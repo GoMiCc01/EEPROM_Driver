@@ -35,8 +35,8 @@ typedef struct
 {
 	I2C_HandleTypeDef *hi2c;
 	uint8_t device_address;
-	uint8_t last_busy_page;
 	uint8_t device_mem_page;
+	uint16_t last_busy_struct_address;
 	uint16_t device_mem_capacity;
 } nvm_device_api_handle;
 

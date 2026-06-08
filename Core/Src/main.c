@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "nvm_high_api.h"
@@ -40,6 +41,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -68,18 +70,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
-	nvm_device_api_handle my_device1 = {
-			.hi2c = &hi2c1,
-			.device_address = 0x50,
-	};
-	nvm_device_api_handle my_device2 = {
-			.hi2c = &hi2c1,
-			.device_address = 0x50,
-	};
-	//uint8_t array[120] = {0};
-	api.init(&my_device1, NVM_API_STATUS_DO_NOT_FORMAT);
-	api.init(&my_device2, NVM_API_STATUS_DO_NOT_FORMAT);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -103,7 +93,14 @@ int main(void)
   MX_I2C1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+	nvm_device_api_handle my_device1 =
+		{
+			.hi2c = &hi2c1,
+			.device_address = (0x50 << 1),
+		};
 
+	//uint8_t array[120] = {0};
+	api.init(&my_device1, NVM_API_STATUS_DO_NOT_FORMAT);
   /* USER CODE END 2 */
 
   /* Infinite loop */
