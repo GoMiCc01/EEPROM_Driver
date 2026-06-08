@@ -71,7 +71,7 @@ static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const
         return NVM_DEVICE_STATUS_OK;
     }
 
-    wl_handle->last_busy_page = last_written - (size - 1);
+    wl_handle->last_busy_page = (last_written / size) * size;
 
     return NVM_DEVICE_STATUS_OK;
 }
