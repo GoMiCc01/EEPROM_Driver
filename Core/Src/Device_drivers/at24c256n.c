@@ -1,19 +1,12 @@
 
 #include "at24c256n.h"
 
-static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle);
-static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size);
-static nvm_device_status_t write_low		(nvm_device_api_handle *const wl_handle, const uint8_t *const data, const uint16_t size);
-static nvm_device_status_t erase_all_low 	(nvm_device_api_handle *const wl_handle);
-static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *const wl_handle, const uint16_t size);
-static HAL_StatusTypeDef at24c256n_wait_for_ready	(nvm_device_api_handle *const wl_handle);
+static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
 
 
-static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
+static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
 	wl_handle->device_mem_capacity = 32768;
 	wl_handle->device_mem_page = 64;
-	wl_handle->last_busy_struct_address = 0xFFFF;
-	//search_last_busy_page(wl_handle, ); //TODO: Впевнитися, що тут буде заповенено поле wl_handle->last_busy_page
 	HAL_StatusTypeDef status = at24c256n_wait_for_ready(wl_handle);
 	if (status != HAL_OK) {
 				return NVM_DEVICE_STATUS_NOT_CONNECTED;
@@ -45,7 +38,7 @@ static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
 	return NVM_DEVICE_STATUS_OK;
 }
 
-static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size){
+static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, uint8_t *const data, const uint16_t size){
 
 	if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
 	{
@@ -68,17 +61,16 @@ static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, 
 
 }
 
-static nvm_device_status_t write_low		(nvm_device_api_handle *const wl_handle, const uint8_t *const data, const uint16_t size) {
+static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, const uint8_t *const data, const uint16_t size) {
 	uint16_t _Size = size;
 	uint8_t *_pData = (uint8_t*)data;
-	//uint16_t _MemAddress = wl_handle->last_busy_struct_address + size;
-	uint16_t _MemAddress = (wl_handle->last_busy_struct_address == 0xFFFF) ? 0x0000 : wl_handle->last_busy_struct_address + size;
-	const uint16_t new_memoryof_last_busy_page = _MemAddress;
+	uint16_t _MemAddress = (wl_handle->last_busy_struct_address == LAST_MEM_STRUCT_ADDRESS) ? 0x0000 : wl_handle->last_busy_struct_address + size;
+	const uint16_t new_memory_of_last_busy_page = _MemAddress;
 
 	while (_Size > 0) {
 		const uint8_t used_memory_for_writing = _MemAddress % 64;
-		const uint8_t free_memory = 64 - used_memory_for_writing;
-		uint16_t dataSize = (free_memory >= _Size) ? _Size : free_memory;
+		const uint8_t free_memory_for_writing = 64 - used_memory_for_writing;
+		uint16_t dataSize = (free_memory_for_writing >= _Size) ? _Size : free_memory_for_writing;
 
 		HAL_StatusTypeDef status = HAL_I2C_Mem_Write(wl_handle->hi2c, wl_handle->device_address,
 				_MemAddress, MEMADD_SIZE, _pData, dataSize, TIMEOUT);
@@ -97,11 +89,11 @@ static nvm_device_status_t write_low		(nvm_device_api_handle *const wl_handle, c
 		_pData += dataSize;
 	}
 
-	wl_handle->last_busy_struct_address = new_memoryof_last_busy_page;
+	wl_handle->last_busy_struct_address = new_memory_of_last_busy_page;
 	return NVM_DEVICE_STATUS_OK;
 }
 
-static nvm_device_status_t erase_all_low		(nvm_device_api_handle *const wl_handle) {
+static nvm_device_status_t erase_all_low(nvm_device_api_handle *const wl_handle) {
 	uint8_t page_buf[64];
 	for (int i = 0; i < sizeof(page_buf); i++) {
 		page_buf[i] = 0xFF;
@@ -124,11 +116,11 @@ static nvm_device_status_t erase_all_low		(nvm_device_api_handle *const wl_handl
 		mem_address += wl_handle->device_mem_page;
 		size -= wl_handle->device_mem_page;
 	}
-	wl_handle->last_busy_struct_address = 0xFFFF;
+	wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
 	return NVM_DEVICE_STATUS_OK;
 }
 
-static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
+static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size){
 
     if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
     {
@@ -138,7 +130,7 @@ static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *co
     uint8_t buffer[wl_handle->device_mem_page];
     uint16_t pages = wl_handle->device_mem_capacity / wl_handle->device_mem_page;
 
-    uint16_t last_written = 0xFFFF;
+    uint16_t last_written = LAST_MEM_STRUCT_ADDRESS;
 
     for (uint16_t page = 0; page < pages; page++)
     {
@@ -165,9 +157,9 @@ static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *co
         }
     }
 
-    if (last_written == 0xFFFF)
+    if (last_written == LAST_MEM_STRUCT_ADDRESS)
     {
-        wl_handle->last_busy_struct_address = 0xFFFF;
+        wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
         return NVM_DEVICE_STATUS_OK;
     }
 
@@ -176,7 +168,7 @@ static nvm_device_status_t last_busy_struct_address  	(nvm_device_api_handle *co
     return NVM_DEVICE_STATUS_OK;
 }
 
-static HAL_StatusTypeDef at24c256n_wait_for_ready	(nvm_device_api_handle *const wl_handle) {
+static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle) {
     return HAL_I2C_IsDeviceReady(wl_handle->hi2c, wl_handle->device_address, 50, TIMEOUT);
 }
 

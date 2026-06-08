@@ -1,6 +1,5 @@
 
 #include "nvm_high_api.h"
-#define LAST_MEM_STRUCT_ADDRESS 0xffff
 
 extern nvm_device_api_t api_low;
 
@@ -32,7 +31,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_fo
 	// 3) fill the field is_device_initialized
 	wl_handle->is_device_initialized = 1;
 	// 4) call search last busy page
-	//status = api_low.last_busy_struct_address(wl_handle, sizeof(nvm_data_t));
+	status = api_low.last_busy_struct_address(wl_handle, sizeof(nvm_data_t));
 	// 5) it looks like nothing to fill
 	// 6) return status
 	return NVM_API_STATUS_OK;

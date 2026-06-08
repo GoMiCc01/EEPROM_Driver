@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
 
+#define LAST_MEM_STRUCT_ADDRESS 0xFFFF
+
 /**
  * 	enum for status returns
  */
