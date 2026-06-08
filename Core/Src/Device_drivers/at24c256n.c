@@ -37,52 +37,45 @@ static nvm_device_status_t write_low 		(nvm_device_api_handle *const wl_handle, 
 static nvm_device_status_t erase_all_low 	(nvm_device_api_handle *const wl_handle){
 	return NVM_DEVICE_STATUS_OK; //!
 }
-static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle){
+static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const wl_handle, const uint16_t size){
 
 	if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
 	{
 		return NVM_DEVICE_STATUS_NOT_CONNECTED;
 	}
 
-    uint8_t buffer[wl_handle->device_mem_page];
-    uint16_t pages = wl_handle->device_mem_capacity / wl_handle->device_mem_page;
+    uint8_t byte;
+    uint32_t last_written = 0xFFFFFFFF;
 
-    for (uint16_t page = 0; page < pages; page++)
+    for (uint32_t addr = 0; addr < wl_handle->device_mem_capacity; addr++)
     {
-        uint16_t addr = page * wl_handle->device_mem_page;
-
         if (HAL_I2C_Mem_Read(
                 wl_handle->hi2c,
                 wl_handle->device_address,
                 addr,
                 I2C_MEMADD_SIZE_16BIT,
-                buffer,
-                wl_handle->device_mem_page,
+                &byte,
+                1,
                 100) != HAL_OK)
         {
             return NVM_DEVICE_STATUS_READ_ERROR;
         }
 
-        uint8_t empty = 1;
-
-        for (uint16_t i = 0; i < wl_handle->device_mem_page; i++)
+        if (byte != 0xFF)
         {
-        	if (buffer[i] != 0xFF)
-        	{
-        		empty = 0;
-        		break;
-        	}
-        }
-
-        if (empty)
-        {
-        	wl_handle->last_busy_page = (page == 0) ? 0 : (page - 1);
-        	return NVM_DEVICE_STATUS_OK;
+            last_written = addr;
         }
     }
-    wl_handle->last_busy_page = pages - 1;
 
-	return NVM_DEVICE_STATUS_OK;
+    if (last_written == 0xFFFFFFFF)
+    {
+        wl_handle->last_busy_page = 0;
+        return NVM_DEVICE_STATUS_OK;
+    }
+
+    wl_handle->last_busy_page = last_written - (size - 1);
+
+    return NVM_DEVICE_STATUS_OK;
 }
 
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle) {
