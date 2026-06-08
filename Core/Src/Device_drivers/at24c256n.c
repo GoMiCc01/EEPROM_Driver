@@ -14,12 +14,10 @@ static nvm_device_status_t read_low  		(nvm_device_api_handle *const wl_handle, 
 		return NVM_DEVICE_STATUS_NOT_CONNECTED;
 	}
 
-	uint16_t addr = wl_handle->last_busy_page * wl_handle->device_mem_page;
-
 	if (HAL_I2C_Mem_Read(
 		wl_handle->hi2c,
 	    wl_handle->device_address,
-	    addr,
+		wl_handle->last_busy_page,
 	    I2C_MEMADD_SIZE_16BIT,
 	    data,
 	    size,
