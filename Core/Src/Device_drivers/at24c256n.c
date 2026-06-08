@@ -43,7 +43,7 @@ static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const
 	}
 
     uint8_t byte;
-    uint32_t last_written = 0xFFFFFFFF;
+    uint32_t last_written = 0xFFFF;
 
     for (uint32_t addr = 0; addr < wl_handle->device_mem_capacity; addr++)
     {
@@ -65,7 +65,7 @@ static nvm_device_status_t search_last_busy_page  	(nvm_device_api_handle *const
         }
     }
 
-    if (last_written == 0xFFFFFFFF)
+    if (last_written == 0xFFFF)
     {
         wl_handle->last_busy_page = 0;
         return NVM_DEVICE_STATUS_OK;
