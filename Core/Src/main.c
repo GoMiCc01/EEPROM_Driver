@@ -94,13 +94,23 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 	nvm_device_api_handle my_device1 =
-		{
-			.hi2c = &hi2c1,
-			.device_address = (0x50 << 1),
-		};
+	{
+		.hi2c = &hi2c1,
+		.device_address = (0x50 << 1),
+	};
 
+	nvm_data_t data = {
+			.data = 13
+	};
+	nvm_data_t data_read = {
+				.data = 0
+	};
 	//uint8_t array[120] = {0};
 	api.init(&my_device1, NVM_API_STATUS_DO_NOT_FORMAT);
+	api.write(&my_device1, &data);
+	data.data = 20;
+	api.write(&my_device1, &data);
+	api.read(&my_device1, &data_read);
   /* USER CODE END 2 */
 
   /* Infinite loop */

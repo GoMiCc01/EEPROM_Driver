@@ -16,7 +16,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_fo
 	// 1) Verify format
 	if (format == NVM_API_STATUS_FORMAT)
 	{
-		// 1) erase -> busy_page = 0x0000
+		// 1) erase -> busy_page = 0xffff
 		nvm_device_status_t status = api_low.erase_all(wl_handle);
 		if (status != NVM_DEVICE_STATUS_OK)
 		{
@@ -32,7 +32,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_fo
 	// 3) fill the field is_device_initialized
 	wl_handle->is_device_initialized = 1;
 	// 4) call search last busy page
-	status = api_low.search_last_busy_page(wl_handle, sizeof(nvm_data_t));
+	//status = api_low.last_busy_struct_address(wl_handle, sizeof(nvm_data_t));
 	// 5) it looks like nothing to fill
 	// 6) return status
 	return NVM_API_STATUS_OK;
@@ -67,11 +67,12 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 	if (NULL == wl_handle || 0 == wl_handle->device_address || NULL == wl_handle->hi2c || NULL == data) {
 		return NVM_API_STATUS_INVALID_PARAMETERS;
 	}
-	if (LAST_MEM_STRUCT_ADDRESS == wl_handle->last_busy_page && (wl_handle->last_busy_page + sizeof(data->data) >= wl_handle->device_mem_capacity)) {
+	if (LAST_MEM_STRUCT_ADDRESS != wl_handle->last_busy_struct_address && (wl_handle->last_busy_struct_address + sizeof(data->data) >= wl_handle->device_mem_capacity)) {
 		if (NVM_DEVICE_STATUS_OK != api_low.erase_all(wl_handle)) return NVM_API_STATUS_WRITE_ERROR;
 	}
 
 	if (NVM_DEVICE_STATUS_OK != api_low.write(wl_handle, &(data->data), sizeof(data->data))) {
+		data_cache.is_valid = 0;
 		return NVM_API_STATUS_WRITE_ERROR;
 	} else {
 		data_cache.data = *data;

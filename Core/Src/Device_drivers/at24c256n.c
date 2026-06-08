@@ -15,7 +15,6 @@ static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
 	wl_handle->last_busy_struct_address = 0xFFFF;
 	//search_last_busy_page(wl_handle, ); //TODO: Впевнитися, що тут буде заповенено поле wl_handle->last_busy_page
 	HAL_StatusTypeDef status = at24c256n_wait_for_ready(wl_handle);
-	//HAL_Delay(10);
 	if (status != HAL_OK) {
 				return NVM_DEVICE_STATUS_NOT_CONNECTED;
 			}
@@ -23,7 +22,7 @@ static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
 	uint16_t t= wl_handle->last_busy_struct_address;*/
 
 	//status = erase_all_low(wl_handle);
-	HAL_Delay(10);
+	/*HAL_Delay(10);
 	uint8_t array[100] = {0};
 	for(int i = 0; i < sizeof(array); i++){
 		array[i] = i;
@@ -41,7 +40,7 @@ static nvm_device_status_t init_low  		(nvm_device_api_handle *const wl_handle){
 	status = write_low(wl_handle, array1, sizeof(array1));
 		if (status != HAL_OK) {
 					return NVM_DEVICE_STATUS_NOT_CONNECTED;
-			}
+			}*/
 
 	return NVM_DEVICE_STATUS_OK;
 }
