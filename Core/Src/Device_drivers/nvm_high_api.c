@@ -1,6 +1,8 @@
 
 #include "nvm_high_api.h"
 
+#define LAST_MEM_STRUCT_ADDRESS 0xFFFF
+
 extern nvm_device_api_t api_low;
 
 static nvm_data_cache data_cache;
@@ -31,7 +33,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_fo
 	// 3) fill the field is_device_initialized
 	wl_handle->is_device_initialized = 1;
 	// 4) call search last busy page
-	status = api_low.last_busy_struct_address(wl_handle, sizeof(nvm_data_t));
+	//status = api_low.last_busy_struct_address(wl_handle, sizeof(nvm_data_t)); //TODO: зробити цю функцію
 	// 5) it looks like nothing to fill
 	// 6) return status
 	return NVM_API_STATUS_OK;
@@ -49,7 +51,7 @@ static nvm_high_api_status_t read  (nvm_device_api_handle *const wl_handle, nvm_
 	if (1 == data_cache.is_valid) {
 		*data = data_cache.data;
 	} else {
-		if (api_low.read(wl_handle, &(data->data), sizeof(data->data)) != NVM_DEVICE_STATUS_OK ) {
+		if (api_low.read(wl_handle, wl_handle->last_busy_struct_address, &(data->data), sizeof(data->data)) != NVM_DEVICE_STATUS_OK ) {
 			return NVM_API_STATUS_READ_ERROR;
 		}
 	}
@@ -70,7 +72,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		if (NVM_DEVICE_STATUS_OK != api_low.erase_all(wl_handle)) return NVM_API_STATUS_WRITE_ERROR;
 	}
 
-	if (NVM_DEVICE_STATUS_OK != api_low.write(wl_handle, &(data->data), sizeof(data->data))) {
+	if (NVM_DEVICE_STATUS_OK != api_low.write(wl_handle, wl_handle->last_busy_struct_address, &(data->data), sizeof(data->data))) {
 		data_cache.is_valid = 0;
 		return NVM_API_STATUS_WRITE_ERROR;
 	} else {
