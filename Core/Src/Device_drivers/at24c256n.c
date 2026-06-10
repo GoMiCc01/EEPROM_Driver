@@ -8,6 +8,17 @@
 
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
 
+/**
+ * @brief Initializes AT24C256N low-level driver.
+ *
+ * Configures device-specific parameters such as total memory size
+ * and page size, then verifies device availability on the I2C bus.
+ *
+ * @param[in,out] wl_handle Pointer to device handle.
+ *
+ * @retval NVM_DEVICE_STATUS_OK Device initialized successfully.
+ * @retval NVM_DEVICE_STATUS_NOT_CONNECTED Device is not responding.
+ */
 static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
 	wl_handle->device_mem_capacity = 32768;
 	wl_handle->device_mem_page = 64;
@@ -20,6 +31,21 @@ static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
 	return NVM_DEVICE_STATUS_OK;
 }
 
+/**
+ * @brief Reads data from EEPROM.
+ *
+ * Performs a random read operation starting from the specified
+ * memory address.
+ *
+ * @param[in] wl_handle Pointer to device handle.
+ * @param[in] mem_address Start memory address.
+ * @param[out] data Destination buffer.
+ * @param[in] size Number of bytes to read.
+ *
+ * @retval NVM_DEVICE_STATUS_OK Read completed successfully.
+ * @retval NVM_DEVICE_STATUS_NOT_CONNECTED Device is not responding.
+ * @retval NVM_DEVICE_STATUS_READ_ERROR Read transaction failed.
+ */
 static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, uint8_t *const data, const uint16_t size){
 	if (at24c256n_wait_for_ready(wl_handle) != HAL_OK) {
 		return NVM_DEVICE_STATUS_NOT_CONNECTED;
@@ -39,6 +65,36 @@ static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, cons
 
 	return NVM_DEVICE_STATUS_OK;
 }
+
+/**
+ * @brief Writes data to EEPROM.
+ *
+ * Data is written using page-oriented transactions. If the requested
+ * write operation crosses a page boundary, the data is automatically
+ * split into multiple page writes according to the device page size.
+ *
+ * The function waits for completion of each internal EEPROM write cycle
+ * before starting the next page transaction.
+ *
+ * Write algorithm:
+ *
+ * 1. Calculate current page offset.
+ * 2. Determine available space in the current page.
+ * 3. Limit transaction size to page boundary.
+ * 4. Wait until EEPROM completes previous write cycle.
+ * 5. Perform page write transaction.
+ * 6. Advance memory address and data pointer.
+ * 7. Repeat until all requested bytes are written.
+ *
+ * @param[in] wl_handle Pointer to device handle.
+ * @param[in] mem_address Start memory address.
+ * @param[in] data Source buffer.
+ * @param[in] size Number of bytes to write.
+ *
+ * @retval NVM_DEVICE_STATUS_OK Write completed successfully.
+ * @retval NVM_DEVICE_STATUS_NOT_CONNECTED Device is not responding.
+ * @retval NVM_DEVICE_STATUS_WRITE_ERROR Write transaction failed.
+ */
 
 static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, const uint8_t *const data, const uint16_t size) {
 	uint16_t _MemAddress = mem_address;
@@ -70,6 +126,17 @@ static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, con
 	return NVM_DEVICE_STATUS_OK;
 }
 
+/**
+ * @brief Erases the entire EEPROM.
+ *
+ * The device memory is filled with 0xFF page by page.
+ *
+ * @param[in] wl_handle Pointer to device handle.
+ *
+ * @retval NVM_DEVICE_STATUS_OK Erase completed successfully.
+ * @retval NVM_DEVICE_STATUS_NOT_CONNECTED Device is not responding.
+ * @retval NVM_DEVICE_STATUS_WRITE_ERROR Erase transaction failed.
+ */
 static nvm_device_status_t erase_all_low(nvm_device_api_handle *const wl_handle) {
 	uint16_t mem_address = 0x0000;
 	int32_t size = wl_handle->device_mem_capacity;
@@ -97,6 +164,20 @@ static nvm_device_status_t erase_all_low(nvm_device_api_handle *const wl_handle)
 	return NVM_DEVICE_STATUS_OK;
 }
 
+/**
+ * @brief Waits until EEPROM becomes ready for the next operation.
+ *
+ * Polls the device using I2C acknowledge until the internal
+ * write cycle is completed or timeout occurs.
+ *
+ * @param[in] wl_handle Pointer to device handle.
+ *
+ * @return HAL status code.
+ * @retval HAL_OK Device is ready.
+ * @retval HAL_ERROR Device is not responding.
+ * @retval HAL_BUSY I2C bus is busy.
+ * @retval HAL_TIMEOUT Timeout expired.
+ */
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle) {
     return HAL_I2C_IsDeviceReady(wl_handle->hi2c, wl_handle->device_address, MAX_ATTEMPTS_TRY, WRITE_TIMEOUT);
 }
