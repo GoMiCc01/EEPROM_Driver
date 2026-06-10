@@ -48,7 +48,7 @@ typedef enum
 
 typedef struct
 {
-	nvm_high_api_status_t (*init)  (nvm_device_api_handle *const wl_handle, nvm_formatting_status_t format);
+	nvm_high_api_status_t (*init)  (nvm_device_api_handle *const wl_handle,const nvm_formatting_status_t format);
 	nvm_high_api_status_t (*read)  (nvm_device_api_handle *const wl_handle, nvm_data_t *data);
 	nvm_high_api_status_t (*write) (nvm_device_api_handle *const wl_handle, const nvm_data_t *const data);
 } nvm_api_t;

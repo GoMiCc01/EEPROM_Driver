@@ -9,7 +9,13 @@ static nvm_data_cache data_cache;
 
 static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size);
 
-static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_formatting_status_t format)
+static nvm_device_status_t verify_checksum(const nvm_device_data_t *const data);
+
+static nvm_device_data_t transform_to_read(uint8_t* data);
+
+static uint8_t* transform_to_write(nvm_device_data_t* data);
+
+static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const nvm_formatting_status_t format)
 {
 	// 0) Verify parameters
 	if (wl_handle->hi2c == NULL || wl_handle->device_address == 0)
