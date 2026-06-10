@@ -2,10 +2,12 @@
 
 #include "nvm_handle.h"
 
+/**
+ * @brief Status codes returned by NVM device operations.
+ */
 typedef enum
 {
-	// init_low
-    NVM_DEVICE_STATUS_OK = 0,
+    NVM_DEVICE_STATUS_OK = 0, /** Operation completed successfully. */
     NVM_DEVICE_STATUS_NOT_CONNECTED,
 	// read_low
     NVM_DEVICE_STATUS_READ_ERROR,
