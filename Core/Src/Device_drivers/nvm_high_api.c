@@ -7,6 +7,8 @@ extern nvm_device_api_t api_low;
 
 static nvm_data_cache data_cache;
 
+static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size);
+
 static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, nvm_formatting_status_t format)
 {
 	// 0) Verify parameters
@@ -81,6 +83,42 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		return NVM_API_STATUS_OK;
 	}
 
+}
+
+static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size){
+
+    uint8_t buffer[wl_handle->device_mem_page];
+    uint16_t pages = wl_handle->device_mem_capacity / wl_handle->device_mem_page;
+
+    uint16_t last_written = LAST_MEM_STRUCT_ADDRESS;
+
+    for (uint16_t page = 0; page < pages; page++)
+    {
+        uint16_t addr = page * wl_handle->device_mem_page;
+
+        if (NVM_DEVICE_STATUS_OK != api_low.read(wl_handle, addr, buffer, wl_handle->device_mem_page))
+        {
+            return NVM_DEVICE_STATUS_READ_ERROR;
+        }
+
+        for (uint16_t i = 0; i < wl_handle->device_mem_page; i++)
+        {
+            if (buffer[i] != 0xFF)
+            {
+                last_written = addr + i;
+            }
+        }
+    }
+
+    if (last_written == LAST_MEM_STRUCT_ADDRESS)
+    {
+        wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
+        return NVM_DEVICE_STATUS_OK;
+    }
+
+    wl_handle->last_busy_struct_address = (last_written / size) * size;
+
+    return NVM_DEVICE_STATUS_OK;
 }
 
 nvm_api_t api = {

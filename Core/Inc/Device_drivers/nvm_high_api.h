@@ -17,6 +17,7 @@ typedef enum
 	// read
     NVM_API_STATUS_READ_ERROR,
 	NVM_API_STATUS_NO_DATA,
+	NVM_API_STATUS_CORRUPTED_DATA,
 	// general
 	NVM_API_STATUS_INVALID_PARAMETERS,
 } nvm_high_api_status_t;
@@ -28,6 +29,11 @@ typedef enum
 typedef struct {
 	uint8_t data;
 } nvm_data_t;
+
+typedef struct {
+	uint8_t data;
+	uint8_t checksum;
+} nvm_device_data_t;
 
 typedef struct {
 	nvm_data_t data;
