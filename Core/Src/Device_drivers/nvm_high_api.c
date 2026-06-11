@@ -101,6 +101,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		} else {
 			data_cache.data = data_device.data;
 			data_cache.is_valid = 1;
+			wl_handle->is_device_initialized = 1;
 		}
 	}
 	return retcode;
