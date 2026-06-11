@@ -74,7 +74,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (retcode == NVM_API_STATUS_OK && NVM_API_STATUS_NOT_INITIALIZED != wl_handle->is_device_initialized) {
+	if (retcode == NVM_API_STATUS_OK && NVM_API_STATUS_NOT_INITIALIZED == wl_handle->is_device_initialized) {
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
