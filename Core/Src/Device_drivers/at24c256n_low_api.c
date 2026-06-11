@@ -1,10 +1,12 @@
 
 #include <at24c256n_low_api.h>
 
-#define MEMADD_SIZE 		I2C_MEMADD_SIZE_16BIT
-#define WRITE_TIMEOUT 		10
-#define READ_TIMEOUT 		100
-#define MAX_ATTEMPTS_TRY 	50
+#define MEMADD_SIZE 			I2C_MEMADD_SIZE_16BIT
+#define WRITE_TIMEOUT 			10
+#define READ_TIMEOUT 			100
+#define MAX_ATTEMPTS_TRY 		50
+#define AT24C256N_MEM_CAPACITY	32768
+#define AT24C256N_PAGE_SIZE 	64
 
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
 
@@ -20,15 +22,23 @@ static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const w
  * @retval NVM_DEVICE_STATUS_NOT_CONNECTED Device is not responding.
  */
 static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
-	wl_handle->device_mem_capacity = 32768;
-	wl_handle->device_mem_page = 64;
+	nvm_device_status_t retcode = NVM_DEVICE_STATUS_OK;
+	HAL_StatusTypeDef status;
 
-	HAL_StatusTypeDef status = at24c256n_wait_for_ready(wl_handle);
-	if (status != HAL_OK) {
-		return NVM_DEVICE_STATUS_NOT_CONNECTED;
+	if (NULL == wl_handle || NULL == wl_handle->hi2c || 0 == wl_handle->device_address) {
+		retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
 	}
 
-	return NVM_DEVICE_STATUS_OK;
+	if(NVM_DEVICE_STATUS_OK == retcode){
+		wl_handle->device_mem_capacity = AT24C256N_MEM_CAPACITY;
+		wl_handle->device_mem_page = AT24C256N_PAGE_SIZE;
+
+		status = at24c256n_wait_for_ready(wl_handle);
+		if (HAL_OK != status) {
+			retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
+		}
+	}
+	return retcode;
 }
 
 /**
@@ -97,33 +107,49 @@ static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, cons
  */
 
 static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, const uint8_t *const data, const uint16_t size) {
-	uint16_t _MemAddress = mem_address;
-	uint8_t *_pData = (uint8_t*)data;
-	int32_t _Size = size;
+	nvm_device_status_t retcode = NVM_DEVICE_STATUS_OK;
+	HAL_StatusTypeDef status;
 
-	while (_Size > 0) {
-		const uint8_t used_memory_for_writing = _MemAddress % wl_handle->device_mem_page;
-		const uint8_t free_memory_for_writing = wl_handle->device_mem_page - used_memory_for_writing;
-		uint16_t dataSize = (free_memory_for_writing >= _Size) ? _Size : free_memory_for_writing;
-
-		HAL_StatusTypeDef status = at24c256n_wait_for_ready(wl_handle);
-		if (status != HAL_OK) {
-			return NVM_DEVICE_STATUS_NOT_CONNECTED;
-		}
-
-		status = HAL_I2C_Mem_Write(wl_handle->hi2c, wl_handle->device_address,
-				_MemAddress, MEMADD_SIZE, _pData, dataSize, WRITE_TIMEOUT);
-
-		if (status != HAL_OK) {
-			return NVM_DEVICE_STATUS_WRITE_ERROR;
-		}
-
-		_MemAddress += dataSize;
-		_Size -= dataSize;
-		_pData += dataSize;
+	if (NULL == wl_handle || NULL == wl_handle->hi2c
+			|| 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page
+			|| size > (wl_handle->device_mem_capacity - mem_address) || NULL == data
+			|| 0 == size) {
+		retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
 	}
 
-	return NVM_DEVICE_STATUS_OK;
+	if(NVM_DEVICE_STATUS_OK == retcode){
+		uint16_t _MemAddress = mem_address;
+		uint8_t *_pData = (uint8_t*)data;
+		int32_t _Size = size;
+
+		while (_Size > 0 && NVM_DEVICE_STATUS_OK == retcode) {
+			const uint8_t used_memory_for_writing = _MemAddress % wl_handle->device_mem_page;
+			const uint8_t free_memory_for_writing = wl_handle->device_mem_page - used_memory_for_writing;
+			uint16_t dataSize = (free_memory_for_writing >= _Size) ? _Size : free_memory_for_writing;
+
+			status = at24c256n_wait_for_ready(wl_handle);
+			if (HAL_OK != status) {
+				retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
+			}
+
+			if (NVM_DEVICE_STATUS_OK == retcode){
+				status = HAL_I2C_Mem_Write(wl_handle->hi2c, wl_handle->device_address,
+						_MemAddress, MEMADD_SIZE, _pData, dataSize, WRITE_TIMEOUT);
+
+				if (HAL_OK != status) {
+					retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
+				}
+			}
+
+			if (NVM_DEVICE_STATUS_OK == retcode){
+				_MemAddress += dataSize;
+				_Size -= dataSize;
+				_pData += dataSize;
+			}
+		}
+	}
+
+	return retcode;
 }
 
 /**
@@ -138,30 +164,43 @@ static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, con
  * @retval NVM_DEVICE_STATUS_WRITE_ERROR Erase transaction failed.
  */
 static nvm_device_status_t erase_all_low(nvm_device_api_handle *const wl_handle) {
-	uint16_t mem_address = 0x0000;
-	int32_t size = wl_handle->device_mem_capacity;
-	uint8_t page_buf[wl_handle->device_mem_page];
-	for (int i = 0; i < sizeof(page_buf); i++) {
-		page_buf[i] = 0xFF;
+	nvm_device_status_t retcode = NVM_DEVICE_STATUS_OK;
+	HAL_StatusTypeDef status;
+
+	if (NULL == wl_handle || NULL == wl_handle->hi2c || 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page) {
+		retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
 	}
 
-	while (size > 0) {
-		HAL_StatusTypeDef status = at24c256n_wait_for_ready(wl_handle);
-		if (status != HAL_OK) {
-			return NVM_DEVICE_STATUS_NOT_CONNECTED;
+	if(NVM_DEVICE_STATUS_OK == retcode){
+		uint16_t mem_address = 0x0000;
+		int32_t size = wl_handle->device_mem_capacity;
+		uint8_t page_buf[wl_handle->device_mem_page];
+		for (uint16_t i = 0; i < sizeof(page_buf); i++) {
+			page_buf[i] = 0xFF;
 		}
 
-		status = HAL_I2C_Mem_Write(wl_handle->hi2c, wl_handle->device_address,
-				mem_address, MEMADD_SIZE, page_buf, wl_handle->device_mem_page, WRITE_TIMEOUT);
+		while (size > 0 && NVM_DEVICE_STATUS_OK == retcode) {
+			status = at24c256n_wait_for_ready(wl_handle);
+			if (HAL_OK != status) {
+				retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
+			}
 
-		if (status != HAL_OK) {
-			return NVM_DEVICE_STATUS_WRITE_ERROR;
+			if (NVM_DEVICE_STATUS_OK == retcode){
+				status = HAL_I2C_Mem_Write(wl_handle->hi2c, wl_handle->device_address,
+						mem_address, MEMADD_SIZE, page_buf, wl_handle->device_mem_page, WRITE_TIMEOUT);
+
+				if (HAL_OK != status) {
+					retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
+				}
+			}
+
+			if (NVM_DEVICE_STATUS_OK == retcode){
+				mem_address += wl_handle->device_mem_page;
+				size -= wl_handle->device_mem_page;
+			}
 		}
-
-		mem_address += wl_handle->device_mem_page;
-		size -= wl_handle->device_mem_page;
 	}
-	return NVM_DEVICE_STATUS_OK;
+	return retcode;
 }
 
 /**
