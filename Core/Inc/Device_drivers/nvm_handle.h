@@ -21,10 +21,6 @@ typedef enum
 	NVM_API_STATUS_INVALID_PARAMETERS,
 } nvm_high_api_status_t;
 
-/**
- * 	stores pointers to low-level functions
- */
-
 typedef struct
 {
 	I2C_HandleTypeDef *hi2c;
