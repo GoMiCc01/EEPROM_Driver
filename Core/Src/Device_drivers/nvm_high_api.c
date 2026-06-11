@@ -114,7 +114,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (retcode == NVM_API_STATUS_OK && NVM_API_STATUS_NOT_INITIALIZED == wl_handle->is_device_initialized) {
+	if (retcode == NVM_API_STATUS_OK && NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status) {
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
@@ -141,7 +141,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		} else {
 			data_cache.data = data_device.data;
 			data_cache.is_valid = 1;
-			wl_handle->is_device_initialized = 1;
+			wl_handle->initializing_status = NVM_API_STATUS_OK;
 		}
 	}
 	return retcode;
@@ -196,7 +196,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 		if (NVM_DEVICE_STATUS_OK == api_low.read(wl_handle, current_busy_address, raw_buffer, sizeof(raw_buffer)))
 		{
 			transform_to_read(raw_buffer, &buffer);
-			if (count_checksum(&buffer) == buffer.checksum)
+			if (count_checksum(&buffer.data) == buffer.checksum)
 			{
 				data_cache.data = buffer.data;
 				data_cache.is_valid = 1;
@@ -253,14 +253,6 @@ static uint8_t count_checksum(const nvm_data_t *const data) {
 	}
 
 	return checksum;
-}
-
-static void transform_to_read(uint8_t* data, nvm_device_data_t* data_device) {
-
-}
-
-static void transform_to_write(nvm_device_data_t* data_device, uint8_t *data) {
-
 }
 
 nvm_api_t api = {
