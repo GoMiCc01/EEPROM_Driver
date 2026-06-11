@@ -57,23 +57,29 @@ static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
  * @retval NVM_DEVICE_STATUS_READ_ERROR Read transaction failed.
  */
 static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, uint8_t *const data, const uint16_t size){
-	if (at24c256n_wait_for_ready(wl_handle) != HAL_OK) {
-		return NVM_DEVICE_STATUS_NOT_CONNECTED;
-	}
+	nvm_device_status_t retcode = NVM_DEVICE_STATUS_OK;
 
-	if (HAL_I2C_Mem_Read(
-		wl_handle->hi2c,
-	    wl_handle->device_address,
-		mem_address,
-	    I2C_MEMADD_SIZE_16BIT,
-	    data,
-	    size,
-		READ_TIMEOUT) != HAL_OK)
+	if (NULL == wl_handle || NULL == wl_handle->hi2c
+			|| 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page
+			|| size > (wl_handle->device_mem_capacity - mem_address) || NULL == data
+			|| 0 == size) {
+		retcode = NVM_DEVICE_STATUS_READ_ERROR;
+	}
+	else
 	{
-		return NVM_DEVICE_STATUS_READ_ERROR;
+		if (HAL_I2C_Mem_Read(
+			wl_handle->hi2c,
+			wl_handle->device_address,
+			mem_address,
+			I2C_MEMADD_SIZE_16BIT,
+			data,
+			size,
+			READ_TIMEOUT) != HAL_OK)
+		{
+			retcode = NVM_DEVICE_STATUS_READ_ERROR;
+		}
 	}
-
-	return NVM_DEVICE_STATUS_OK;
+	return retcode;
 }
 
 /**
