@@ -98,13 +98,30 @@ int main(void)
 		.hi2c = &hi2c1,
 		.device_address = (0x50 << 1),
 	};
+	nvm_device_api_handle my_device2 =
+	{
+		.hi2c = &hi2c1,
+		.device_address = (0x50 << 1),
+	};
 
-	nvm_data_t data_read = {
-				.data = 0
+	nvm_data_t data_write1 = {
+			.data = 15
+	};
+	nvm_data_t data_write2 = {
+			.data = 20
+	};
+
+	nvm_data_t data_read1 = {
+			.data = 0
+	};
+	nvm_data_t data_read2 = {
+			.data = 0
 	};
 	//uint8_t array[120] = {0};
-	api.init(&my_device1, NVM_API_STATUS_DO_NOT_FORMAT);
-	api.read(&my_device1, &data_read);
+	api.init(&my_device1, NVM_API_STATUS_FORMAT);
+	api.read(&my_device1, &data_read1);
+	api.write(&my_device1, &data_write1);
+	api.read(&my_device1, &data_read2);
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -126,7 +126,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 	};
 	transform_to_write(&data_device, data_to_write);
 
-	if (retcode == NVM_API_STATUS_OK && (LAST_MEM_STRUCT_ADDRESS == wl_handle->last_busy_struct_address || wl_handle->last_busy_struct_address + DEVICE_DATA_SIZE >= wl_handle->device_mem_capacity)) {
+	if ((retcode == NVM_API_STATUS_OK) && ((LAST_MEM_STRUCT_ADDRESS != wl_handle->last_busy_struct_address) && (wl_handle->last_busy_struct_address + DEVICE_DATA_SIZE >= wl_handle->device_mem_capacity))){
 		if (NVM_DEVICE_STATUS_OK != api_low.erase_all(wl_handle)) {
 			retcode = NVM_API_STATUS_WRITE_ERROR;
 		} else {
