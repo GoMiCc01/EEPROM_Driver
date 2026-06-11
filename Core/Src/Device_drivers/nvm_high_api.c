@@ -33,6 +33,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 	{
 		if (api_low.init(wl_handle) != NVM_DEVICE_STATUS_OK)
 		{
+			wl_handle->initializing_status = NVM_API_STATUS_NOT_INITIALIZED;
 			status = NVM_API_STATUS_NOT_INITIALIZED;
 		}
 	}
@@ -46,17 +47,18 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 		}
 		else
 		{
+			wl_handle->initializing_status = NVM_API_STATUS_NO_DATA;
 			wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
 		}
 	}
 	else if ((NVM_API_STATUS_OK == status) && last_busy_struct_address(wl_handle, sizeof(nvm_device_data_t)) != NVM_DEVICE_STATUS_OK)
 	{
+		wl_handle->initializing_status = NVM_API_STATUS_NO_DATA;
 		status = NVM_API_STATUS_READ_ERROR;
 	}
 
 	if (NVM_API_STATUS_OK == status)
 	{
-		wl_handle->is_device_initialized = 1;
 		data_cache.is_valid = 0;
 
 		if (wl_handle->last_busy_struct_address != LAST_MEM_STRUCT_ADDRESS)
@@ -70,7 +72,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 
 static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_data_t *data)
 {
-	if (0 == wl_handle->is_device_initialized)
+	if (NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
 	{
 		return NVM_API_STATUS_NOT_INITIALIZED;
 	}
@@ -98,7 +100,7 @@ static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_da
 static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const nvm_data_t *const data)
 {
 
-	if (1 != wl_handle->is_device_initialized)
+	if (NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
 	{
 		return NVM_API_STATUS_NOT_INITIALIZED;
 	}
@@ -184,6 +186,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 			}
 			else
 			{
+				wl_handle->initializing_status = NVM_API_STATUS_CORRUPTED_DATA;
 				if (current_busy_address >= sizeof(nvm_device_data_t))
 				{
 					current_busy_address -= sizeof(nvm_device_data_t);
