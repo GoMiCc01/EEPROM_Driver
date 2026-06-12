@@ -8,6 +8,7 @@
 typedef enum
 {
     NVM_DEVICE_STATUS_OK = 0, 			/** Operation completed successfully. */
+	NVM_DEVICE_STATUS_NOT_INITIALIZED,  /** Device is not initialized. */
     NVM_DEVICE_STATUS_NOT_CONNECTED,  	/** Device is not accessible on the I2C bus. */
     NVM_DEVICE_STATUS_READ_ERROR, 		/** Read operation failed. */
 	NVM_DEVICE_STATUS_WRITE_ERROR,		/** Write operation failed. */

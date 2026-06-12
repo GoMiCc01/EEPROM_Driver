@@ -26,7 +26,7 @@ static nvm_device_status_t init_low(nvm_device_api_handle *const wl_handle){
 	HAL_StatusTypeDef status;
 
 	if (NULL == wl_handle || NULL == wl_handle->hi2c || 0 == wl_handle->device_address) {
-		retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
+		retcode = NVM_DEVICE_STATUS_NOT_INITIALIZED;
 	}
 
 	if(NVM_DEVICE_STATUS_OK == retcode){
@@ -63,7 +63,7 @@ static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, cons
 			|| 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page
 			|| size > (wl_handle->device_mem_capacity - mem_address) || NULL == data
 			|| 0 == size) {
-		retcode = NVM_DEVICE_STATUS_READ_ERROR;
+		retcode = NVM_DEVICE_STATUS_NOT_INITIALIZED;
 	}
 	else
 	{
@@ -120,7 +120,7 @@ static nvm_device_status_t write_low(nvm_device_api_handle *const wl_handle, con
 			|| 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page
 			|| size > (wl_handle->device_mem_capacity - mem_address) || NULL == data
 			|| 0 == size) {
-		retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
+		retcode = NVM_DEVICE_STATUS_NOT_INITIALIZED;
 	}
 
 	if(NVM_DEVICE_STATUS_OK == retcode){
@@ -174,7 +174,7 @@ static nvm_device_status_t erase_all_low(nvm_device_api_handle *const wl_handle)
 	HAL_StatusTypeDef status;
 
 	if (NULL == wl_handle || NULL == wl_handle->hi2c || 0 == wl_handle->device_address || 0 == wl_handle->device_mem_page) {
-		retcode = NVM_DEVICE_STATUS_WRITE_ERROR;
+		retcode = NVM_DEVICE_STATUS_NOT_INITIALIZED;
 	}
 
 	if(NVM_DEVICE_STATUS_OK == retcode){
