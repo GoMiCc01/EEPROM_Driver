@@ -6,8 +6,6 @@
 
 extern nvm_device_api_t api_low;
 
-static nvm_data_cache data_cache;
-
 static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size);
 
 static uint8_t count_checksum(const nvm_data_t *const data);
@@ -59,7 +57,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 
     if (NVM_API_STATUS_OK == status)
     {
-        data_cache.is_valid = 0;
+    	wl_handle->data_cache.is_valid = 0;
 
         if (wl_handle->last_busy_struct_address != LAST_MEM_STRUCT_ADDRESS)
         {
@@ -81,14 +79,14 @@ static nvm_high_api_status_t read  (nvm_device_api_handle *const wl_handle, nvm_
         retcode = NVM_API_STATUS_NOT_INITIALIZED;
     }
 
-    if (NVM_API_STATUS_NO_DATA == wl_handle->initializing_status) {
+    if (NVM_API_STATUS_OK == retcode && NVM_API_STATUS_NO_DATA == wl_handle->initializing_status) {
         retcode = NVM_API_STATUS_NO_DATA;
     }
 
-    if (NVM_API_STATUS_OK == retcode && 1 == data_cache.is_valid && wl_handle->initializing_status != NVM_API_STATUS_CORRUPTED_DATA) {
-        *data = data_cache.data;
-    } else if (NVM_API_STATUS_OK == retcode && 1 == data_cache.is_valid && NVM_API_STATUS_CORRUPTED_DATA == wl_handle->initializing_status) {
-        *data = data_cache.data;
+    if (NVM_API_STATUS_OK == retcode && 1 == wl_handle->data_cache.is_valid && wl_handle->initializing_status != NVM_API_STATUS_CORRUPTED_DATA) {
+        *data = wl_handle->data_cache.data;
+    } else if (NVM_API_STATUS_OK == retcode && 1 == wl_handle->data_cache.is_valid && NVM_API_STATUS_CORRUPTED_DATA == wl_handle->initializing_status) {
+        *data = wl_handle->data_cache.data;
         retcode = NVM_API_STATUS_CORRUPTED_DATA;
     } else {
         if (NVM_API_STATUS_OK == retcode) {
@@ -139,8 +137,8 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 		if (NVM_DEVICE_STATUS_OK != api_low.write(wl_handle, _MemAddress, data_to_write, DEVICE_DATA_SIZE)) {
 			retcode = NVM_API_STATUS_WRITE_ERROR;
 		} else {
-			data_cache.data = data_device.data;
-			data_cache.is_valid = 1;
+			wl_handle->data_cache.data = data_device.data;
+			wl_handle->data_cache.is_valid = 1;
 			wl_handle->initializing_status = NVM_API_STATUS_OK;
 		}
 	}
@@ -198,8 +196,8 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 			transform_to_read(raw_buffer, &buffer);
 			if (count_checksum(&buffer.data) == buffer.checksum)
 			{
-				data_cache.data = buffer.data;
-				data_cache.is_valid = 1;
+				wl_handle->data_cache.data = buffer.data;
+				wl_handle->data_cache.is_valid = 1;
 				wl_handle->last_busy_struct_address = current_busy_address;
 				found_valid_data = 1;
 			}
@@ -213,7 +211,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 				else
 				{
 					wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
-					data_cache.is_valid = 0;
+					wl_handle->data_cache.is_valid = 0;
 					break;
 				}
 			}
@@ -221,7 +219,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 		else
 		{
 			status = NVM_API_STATUS_READ_ERROR;
-			data_cache.is_valid = 0;
+			wl_handle->data_cache.is_valid = 0;
 			break;
 		}
 	}
