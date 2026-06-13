@@ -1,5 +1,5 @@
-
 #include <at24c256n_low_api.h>
+#include "nvm_handle.h"
 
 #define MEMADD_SIZE 			I2C_MEMADD_SIZE_16BIT
 #define WRITE_TIMEOUT 			10

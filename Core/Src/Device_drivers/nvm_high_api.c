@@ -1,8 +1,27 @@
 
 #include "nvm_high_api.h"
+#include "stdlib.h"
+#include "nvm_handle.h"
+#include "at24c256n_low_api.h"
 
 #define LAST_MEM_STRUCT_ADDRESS 0xFFFF
 #define DEVICE_DATA_SIZE 2
+
+nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_address)
+{
+	nvm_device_api_handle *handle = (nvm_device_api_handle *)malloc(sizeof(nvm_device_api_handle));
+	if (handle != NULL)
+	{
+		handle->hi2c = hi2c;
+		handle->device_address = device_address;
+	}
+	return handle;
+}
+
+void deleteEntity(nvm_device_api_handle *handle)
+{
+	free(handle);
+}
 
 extern nvm_device_api_t api_low;
 
@@ -18,6 +37,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 
 static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const nvm_formatting_status_t format)
 {
+	wl_handle->initializing_status = NVM_API_STATUS_OK;
     nvm_high_api_status_t status = NVM_API_STATUS_OK;
 
     // 0) verify parameters
