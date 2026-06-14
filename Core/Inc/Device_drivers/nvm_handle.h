@@ -11,6 +11,12 @@
 typedef struct
 {
 	nvm_data_t data;
+	uint8_t checksum;
+} nvm_device_data_t;
+
+typedef struct
+{
+	nvm_data_t data;
 	uint8_t is_valid;
 } nvm_data_cache;
 

@@ -28,12 +28,6 @@ typedef struct
 	uint8_t data;
 } nvm_data_t;
 
-typedef struct
-{
-	nvm_data_t data;
-	uint8_t checksum;
-} nvm_device_data_t;
-
 typedef enum
 {
 	NVM_API_STATUS_DO_NOT_FORMAT = 0,
