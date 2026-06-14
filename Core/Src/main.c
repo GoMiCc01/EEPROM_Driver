@@ -104,6 +104,8 @@ int main(void)
   api.read(my_device1, &data_read1);
   api.write(my_device1, &data_write1);
   api.read(my_device1, &data_read1);
+  deleteEntity(my_device1);
+  my_device1 = NULL;
   /* USER CODE END 2 */
 
   /* Infinite loop */
