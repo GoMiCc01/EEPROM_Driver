@@ -6,3 +6,5 @@
 .DS_Store
 eim_config.toml
 Debug/
+html/
+latex/

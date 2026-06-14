@@ -124,7 +124,6 @@ int main(void)
 	api.write(&my_device2, &data_write2);
 	api.read(&my_device1, &data_read1);
 	api.read(&my_device2, &data_read2);
-	api.read(&my_device2, &data_read2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
