@@ -87,7 +87,7 @@ static nvm_high_api_status_t read  (nvm_device_api_handle *const wl_handle, nvm_
         *data = wl_handle->data_cache.data;
     } else if (NVM_API_STATUS_OK == retcode && 1 == wl_handle->data_cache.is_valid && NVM_API_STATUS_CORRUPTED_DATA == wl_handle->initializing_status) {
         *data = wl_handle->data_cache.data;
-        retcode = NVM_API_STATUS_CORRUPTED_DATA;
+        retcode = NVM_API_STATUS_OLD_DATA;
     } else {
         if (NVM_API_STATUS_OK == retcode) {
             uint8_t read_data_arr[DEVICE_DATA_SIZE] = {0};
