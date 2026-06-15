@@ -1,17 +1,23 @@
-
 #include "nvm_high_api.h"
 #include "stdlib.h"
 #include "nvm_handle.h"
-#include "at24c256n_low_api.h"
+#include "nvm_low_api.h"
 
 #define LAST_MEM_STRUCT_ADDRESS 0xFFFF
 #define DEVICE_DATA_SIZE 2
+#define MAX_DEVICE_COUNT 10
+
+static nvm_device_api_handle handle_pool[MAX_DEVICE_COUNT];
+static uint8_t device_count = 0;
 
 nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_address)
 {
-	nvm_device_api_handle *handle = (nvm_device_api_handle *)malloc(sizeof(nvm_device_api_handle));
-	if (handle != NULL)
+	nvm_device_api_handle *handle = NULL;
+	if (device_count < MAX_DEVICE_COUNT)
 	{
+		nvm_device_api_handle *handle = NULL;
+
+		handle = &handle_pool[device_count];
 		handle->hi2c = hi2c;
 		handle->device_address = device_address;
 		handle->initializing_status = NVM_API_STATUS_NOT_INITIALIZED;
@@ -19,13 +25,9 @@ nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_addr
 		handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
 		handle->device_mem_capacity = 0;
 		handle->data_cache.is_valid = 0;
+		device_count++;
 	}
 	return handle;
-}
-
-void deleteEntity(nvm_device_api_handle *handle)
-{
-	free(handle);
 }
 
 static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle);

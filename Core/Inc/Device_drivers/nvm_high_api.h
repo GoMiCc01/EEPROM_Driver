@@ -21,7 +21,6 @@ typedef enum
 // Opaque pointer
 typedef struct nvm_device_api_handle_s nvm_device_api_handle;
 nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_address);
-void deleteEntity(nvm_device_api_handle *handle);
 
 typedef struct
 {
