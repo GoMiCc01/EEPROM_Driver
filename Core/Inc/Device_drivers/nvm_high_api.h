@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "at24c256n_low_api.h"
+#include <nvm_low_api.h>
 #include "nvm_handle.h"
 
 

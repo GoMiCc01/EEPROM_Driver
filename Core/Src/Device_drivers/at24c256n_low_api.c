@@ -1,5 +1,5 @@
 
-#include <at24c256n_low_api.h>
+#include <nvm_low_api.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -69,14 +69,18 @@ static nvm_device_status_t read_low(nvm_device_api_handle *const wl_handle, cons
 	}
 	else
 	{
-		if (HAL_I2C_Mem_Read(
-			wl_handle->hi2c,
-			wl_handle->device_address,
-			mem_address,
-			I2C_MEMADD_SIZE_16BIT,
-			data,
-			size,
-			READ_TIMEOUT) != HAL_OK)
+		if (at24c256n_wait_for_ready(wl_handle) != HAL_OK)
+		{
+			retcode = NVM_DEVICE_STATUS_NOT_CONNECTED;
+		}
+		else if (HAL_I2C_Mem_Read(
+				wl_handle->hi2c,
+				wl_handle->device_address,
+				mem_address,
+				I2C_MEMADD_SIZE_16BIT,
+				data,
+				size,
+				READ_TIMEOUT) != HAL_OK)
 		{
 			retcode = NVM_DEVICE_STATUS_READ_ERROR;
 		}
