@@ -56,3 +56,5 @@ typedef struct
 	 */
 	nvm_device_status_t (*erase_all) (nvm_device_api_handle *const wl_handle);
 } nvm_device_api_t;
+
+extern nvm_device_api_t at24c256n_low_api;

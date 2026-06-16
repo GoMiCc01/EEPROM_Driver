@@ -9,7 +9,6 @@
 
 static nvm_device_api_handle handle_pool[MAX_DEVICE_COUNT];
 static uint8_t device_count = 0;
-static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size);
 static uint8_t count_checksum(const nvm_data_t *const data);
 
 nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_address)
@@ -34,8 +33,6 @@ nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_addr
 
 static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle);
 
-static uint8_t count_checksum(const nvm_data_t *const data);
-
 static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const nvm_formatting_status_t format)
 {
 	wl_handle->initializing_status = NVM_API_STATUS_OK;
@@ -50,7 +47,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 	// 1) call init_low
 	if (NVM_API_STATUS_OK == status)
 	{
-		if (api_low.init(wl_handle) != NVM_DEVICE_STATUS_OK)
+		if (at24c256n_low_api.init(wl_handle) != NVM_DEVICE_STATUS_OK)
 		{
 			wl_handle->initializing_status = NVM_API_STATUS_NOT_INITIALIZED;
 			status = NVM_API_STATUS_NOT_INITIALIZED;
@@ -60,7 +57,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 	// 2) format
 	if ((NVM_API_STATUS_OK == status) && (NVM_API_STATUS_FORMAT == format))
 	{
-		if (api_low.erase_all(wl_handle) != NVM_DEVICE_STATUS_OK)
+		if (at24c256n_low_api.erase_all(wl_handle) != NVM_DEVICE_STATUS_OK)
 		{
 			status = NVM_API_STATUS_WRITE_ERROR;
 		}
@@ -126,7 +123,7 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 	if ((retcode == NVM_API_STATUS_OK)
 			&& ((LAST_MEM_STRUCT_ADDRESS != wl_handle->last_busy_struct_address)
 			&& (wl_handle->last_busy_struct_address + DEVICE_DATA_SIZE >= wl_handle->device_mem_capacity))){
-		if (NVM_DEVICE_STATUS_OK != api_low.erase_all(wl_handle)) {
+		if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.erase_all(wl_handle)) {
 			retcode = NVM_API_STATUS_WRITE_ERROR;
 		}
 		else
@@ -138,7 +135,7 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 	if (retcode == NVM_API_STATUS_OK)
 	{
 		_MemAddress = (wl_handle->last_busy_struct_address == LAST_MEM_STRUCT_ADDRESS) ? 0x0000 : wl_handle->last_busy_struct_address + DEVICE_DATA_SIZE;
-		if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.write(wl_handle, _MemAddress, data_to_write, DEVICE_DATA_SIZE)) {
+		if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.write(wl_handle, _MemAddress, (uint8_t*)&data_device, DEVICE_DATA_SIZE)) {
 			retcode = NVM_API_STATUS_WRITE_ERROR;
 		}
 		else
