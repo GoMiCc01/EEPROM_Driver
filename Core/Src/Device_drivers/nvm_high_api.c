@@ -4,7 +4,7 @@
 #define LAST_MEM_STRUCT_ADDRESS 0xFFFF
 #define DEVICE_DATA_SIZE 2
 
-extern nvm_device_api_t api_low;
+extern nvm_device_api_t at24c256n_low_api;
 
 static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle, const uint16_t size);
 
@@ -29,7 +29,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
     // 1) call init_low
     if (NVM_API_STATUS_OK == status)
     {
-        if (api_low.init(wl_handle) != NVM_DEVICE_STATUS_OK)
+        if (at24c256n_low_api.init(wl_handle) != NVM_DEVICE_STATUS_OK)
         {
             wl_handle->initializing_status = NVM_API_STATUS_NOT_INITIALIZED;
             status = NVM_API_STATUS_NOT_INITIALIZED;
@@ -39,7 +39,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
     // 2) format
     if ((NVM_API_STATUS_OK == status) && (format == NVM_API_STATUS_FORMAT))
     {
-        if (api_low.erase_all(wl_handle) != NVM_DEVICE_STATUS_OK)
+        if (at24c256n_low_api.erase_all(wl_handle) != NVM_DEVICE_STATUS_OK)
         {
             status = NVM_API_STATUS_WRITE_ERROR;
         }
@@ -122,7 +122,7 @@ static nvm_high_api_status_t write (nvm_device_api_handle *const wl_handle, cons
 
 	if (retcode == NVM_API_STATUS_OK) {
 		_MemAddress = (wl_handle->last_busy_struct_address == LAST_MEM_STRUCT_ADDRESS) ? 0x0000 : wl_handle->last_busy_struct_address + DEVICE_DATA_SIZE;
-		if (NVM_DEVICE_STATUS_OK != api_low.write(wl_handle, _MemAddress, data_to_write, DEVICE_DATA_SIZE)) {
+		if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.write(wl_handle, _MemAddress, data_to_write, DEVICE_DATA_SIZE)) {
 			retcode = NVM_API_STATUS_WRITE_ERROR;
 		} else {
 			wl_handle->data_cache.data = data_device.data;
@@ -146,7 +146,7 @@ static nvm_device_status_t last_busy_struct_address(nvm_device_api_handle *const
 	{
 		uint16_t addr = page * wl_handle->device_mem_page;
 
-		if (NVM_DEVICE_STATUS_OK != api_low.read(wl_handle, addr, buffer, wl_handle->device_mem_page))
+		if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.read(wl_handle, addr, buffer, wl_handle->device_mem_page))
 		{
 			return NVM_DEVICE_STATUS_READ_ERROR;
 		}
@@ -180,7 +180,7 @@ static nvm_high_api_status_t find_valid_data(nvm_device_api_handle *const wl_han
 	nvm_device_data_t buffer;
 	while (!found_valid_data)
 	{
-		if (NVM_DEVICE_STATUS_OK == api_low.read(wl_handle, current_busy_address, raw_buffer, sizeof(raw_buffer)))
+		if (NVM_DEVICE_STATUS_OK == at24c256n_low_api.read(wl_handle, current_busy_address, raw_buffer, sizeof(raw_buffer)))
 		{
 			transform_to_read(raw_buffer, &buffer);
 			if (count_checksum(&buffer.data) == buffer.checksum)
