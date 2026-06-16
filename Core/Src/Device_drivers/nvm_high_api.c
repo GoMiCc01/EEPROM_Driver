@@ -71,7 +71,7 @@ static nvm_high_api_status_t init(nvm_device_api_handle *const wl_handle, const 
 static nvm_high_api_status_t read  (nvm_device_api_handle *const wl_handle, nvm_data_t *data){
     nvm_high_api_status_t retcode = NVM_API_STATUS_OK;
 
-    if (NULL == wl_handle || NULL == wl_handle->hi2c || 0 == wl_handle->device_address || NULL == data) {
+    if (NULL == wl_handle || NULL == data) {
         retcode = NVM_API_STATUS_INVALID_PARAMETERS;
     }
 
@@ -83,24 +83,10 @@ static nvm_high_api_status_t read  (nvm_device_api_handle *const wl_handle, nvm_
         retcode = NVM_API_STATUS_NO_DATA;
     }
 
-    if (NVM_API_STATUS_OK == retcode && wl_handle->data_cache.is_valid && wl_handle->initializing_status != NVM_API_STATUS_CORRUPTED_DATA) {
+    if (NVM_API_STATUS_OK == retcode && wl_handle->data_cache.is_valid) {
         *data = wl_handle->data_cache.data;
-    } else if (NVM_API_STATUS_OK == retcode && wl_handle->data_cache.is_valid && NVM_API_STATUS_CORRUPTED_DATA == wl_handle->initializing_status) {
-        *data = wl_handle->data_cache.data;
-        retcode = NVM_API_STATUS_CORRUPTED_DATA;
     } else {
-        if (NVM_API_STATUS_OK == retcode) {
-            uint8_t read_data_arr[DEVICE_DATA_SIZE] = {0};
-            if (api_low.read(wl_handle, wl_handle->last_busy_struct_address, read_data_arr, sizeof(read_data_arr)) == NVM_DEVICE_STATUS_OK) {
-                nvm_device_data_t read_data;
-                transform_to_read(read_data_arr, &read_data);
-                if(read_data.checksum != count_checksum(&(read_data.data))) {
-                    retcode = NVM_API_STATUS_CORRUPTED_DATA;
-                }
-            } else {
-                retcode = NVM_API_STATUS_READ_ERROR;
-            }
-        }
+        retcode = NVM_API_STATUS_READ_ERROR;
     }
 
     return retcode;
