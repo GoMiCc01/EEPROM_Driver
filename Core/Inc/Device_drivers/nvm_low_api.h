@@ -1,5 +1,4 @@
 #pragma once
-
 #include "nvm_handle.h"
 
 /**
