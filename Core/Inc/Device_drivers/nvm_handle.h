@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "stm32f4xx_hal.h"
 
 /**
@@ -29,7 +30,7 @@ typedef struct
 typedef struct
 {
 	nvm_data_t data;
-	uint8_t is_valid;
+	bool is_valid;
 } nvm_data_cache;
 
 typedef struct
