@@ -18,6 +18,24 @@ static uint8_t count_checksum(const nvm_data_t *const data);
 static nvm_high_api_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle);
 static bool is_memory_equal(const uint8_t* arg1 , const uint8_t* arg2, uint16_t size);
 
+static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, nvm_data_t * const data) {
+	bool retcode = true;
+	if (NULL == wl_handle || NULL == data)
+		{
+			retcode = false;
+		}
+	return retcode;
+}
+
+static inline bool is_initialized(nvm_device_api_handle *const wl_handle) {
+	bool retcode = true;
+	if (NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
+	{
+		retcode = false;
+	}
+	return retcode;
+}
+
 nvm_device_api_handle *createEntity(I2C_HandleTypeDef *hi2c, uint8_t device_address)
 {
 	nvm_device_api_handle *handle = NULL;
@@ -82,13 +100,11 @@ static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_da
 {
 	nvm_high_api_status_t retcode = NVM_API_STATUS_OK;
 
-	if (NULL == wl_handle || NULL == data)
-	{
+	if (!is_parameter_valid(wl_handle, (nvm_data_t * const)data)) {
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (NVM_API_STATUS_OK == retcode && NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
-	{
+	if (!is_initialized(wl_handle)) {
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
@@ -112,13 +128,11 @@ static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_da
 static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const nvm_data_t *const user_data)
 {
 	nvm_high_api_status_t retcode = NVM_API_STATUS_OK;
-	if (NULL == wl_handle || NULL == user_data)
-	{
+	if (!is_parameter_valid(wl_handle, (nvm_data_t * const)user_data)) {
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (retcode == NVM_API_STATUS_OK && NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
-	{
+	if (!is_initialized(wl_handle)) {
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
@@ -175,6 +189,7 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 			wl_handle->data_cache.is_valid = true;
 			wl_handle->initializing_status = NVM_API_STATUS_OK;
 			wl_handle->last_busy_struct_address = _MemAddress;
+			retcode = NVM_API_STATUS_OK;
 		}
 	}
 
