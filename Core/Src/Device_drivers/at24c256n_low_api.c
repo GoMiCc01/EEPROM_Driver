@@ -11,9 +11,13 @@
 #define AT24C256N_PAGE_SIZE 	64
 
 static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const wl_handle);
-static inline bool is_handle_valid(nvm_device_api_handle *const wl_handle);
-static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, const uint8_t *const data, const uint16_t size);
+static inline bool is_handle_valid(nvm_device_api_handle *const wl_handle){
+	return (NULL != wl_handle) && (NULL != wl_handle->hi2c) && (0 != wl_handle->device_address);
+}
 
+static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, const uint8_t *const data, const uint16_t size){
+	return is_handle_valid(wl_handle) && (size <= (wl_handle->device_mem_capacity - mem_address)) && (NULL != data) && (0 != size);
+}
 /**
  * @brief Initializes AT24C256N low-level driver.
  *
@@ -249,13 +253,6 @@ static HAL_StatusTypeDef at24c256n_wait_for_ready(nvm_device_api_handle *const w
 	return HAL_I2C_IsDeviceReady(wl_handle->hi2c, wl_handle->device_address, MAX_ATTEMPTS_TRY, WRITE_TIMEOUT);
 }
 
-static inline bool is_handle_valid(nvm_device_api_handle *const wl_handle){
-	return (NULL != wl_handle) && (NULL != wl_handle->hi2c) && (0 != wl_handle->device_address);
-}
-
-static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, const uint16_t mem_address, const uint8_t *const data, const uint16_t size){
-	return is_handle_valid(wl_handle) && (size <= (wl_handle->device_mem_capacity - mem_address)) && (NULL != data) && (0 != size);
-}
 
 nvm_device_api_t at24c256n_low_api = {
 		.init = init_low,
