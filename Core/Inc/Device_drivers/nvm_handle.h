@@ -24,13 +24,14 @@
  * @brief Data structure stored directly in memory.
  * Contains user data and a checksum for validation.
  */
+#pragma pack(push,1)
 typedef struct
 {
     uint8_t memory_flag; /**< Indicates memory cell state */
 	uint8_t checksum; /**< CRC8 checksum */
     nvm_data_t data;  /**< Main payload data */
 } nvm_device_data_t;
-
+#pragma pack(pop)
 /**
  * @brief Structure for caching the latest read/written data in RAM.
  */

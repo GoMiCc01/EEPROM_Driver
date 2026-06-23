@@ -6,6 +6,7 @@
 #include "nvm_high_api.h"
 #include "nvm_handle.h"
 #include "nvm_low_api.h"
+#include <string.h>
 
 #define LAST_MEM_STRUCT_ADDRESS 0xFFFF
 #define MAX_DEVICE_COUNT 10
@@ -123,7 +124,7 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 	}
 
 	uint16_t _MemAddress = 0;
-	nvm_device_data_t data_device = {
+	const nvm_device_data_t data_device = {
 		.data = *user_data,
 		.checksum = count_checksum(user_data),
 		.memory_flag = NVM_RECORD_VALID
@@ -163,13 +164,13 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 			}
 			else
 			{
-				uint8_t bad_flag = NVM_RECORD_BAD;
-				at24c256n_low_api.write(wl_handle, _MemAddress, &bad_flag , sizeof(bad_flag));
+				nvm_device_data_t bad_flag ={.memory_flag = NVM_RECORD_BAD};
+				at24c256n_low_api.write(wl_handle, _MemAddress, (uint8_t*)&bad_flag , sizeof(bad_flag));
 				_MemAddress += sizeof(nvm_device_data_t);
 			}
 
 		}
-		if(write_ok == true)
+		if(write_ok)
 		{
 			wl_handle->data_cache.data = data_device.data;
 			wl_handle->data_cache.is_valid = true;
@@ -282,13 +283,10 @@ static uint8_t count_checksum(const nvm_data_t *const data)
  */
 static bool is_memory_equal(const uint8_t* arg1 , const uint8_t* arg2, uint16_t size)
 {
-	for(uint16_t i = 0; i < size; i++)
-	{
-		if(arg1[i]!=arg2[i]){
-			return false;
-		}
+	if(!memcmp(arg1,arg2,size)){
+		return true;
 	}
-	return true;
+	return false;
 }
 
 /**
