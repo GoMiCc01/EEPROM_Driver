@@ -17,18 +17,19 @@ static uint8_t device_count = 0;
 
 static uint8_t count_checksum(const nvm_data_t *const data);
 static nvm_high_api_status_t last_busy_struct_address(nvm_device_api_handle *const wl_handle);
-static bool is_memory_equal(const uint8_t* arg1 , const uint8_t* arg2, uint16_t size);
 
-static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, nvm_data_t * const data) {
+static inline bool is_parameter_valid(nvm_device_api_handle *const wl_handle, nvm_data_t *const data)
+{
 	bool retcode = true;
 	if (NULL == wl_handle || NULL == data)
-		{
-			retcode = false;
-		}
+	{
+		retcode = false;
+	}
 	return retcode;
 }
 
-static inline bool is_initialized(nvm_device_api_handle *const wl_handle) {
+static inline bool is_initialized(nvm_device_api_handle *const wl_handle)
+{
 	bool retcode = true;
 	if (NVM_API_STATUS_NOT_INITIALIZED == wl_handle->initializing_status)
 	{
@@ -101,11 +102,13 @@ static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_da
 {
 	nvm_high_api_status_t retcode = NVM_API_STATUS_OK;
 
-	if (!is_parameter_valid(wl_handle, (nvm_data_t * const)data)) {
+	if (!is_parameter_valid(wl_handle, (nvm_data_t *const)data))
+	{
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (!is_initialized(wl_handle)) {
+	if (!is_initialized(wl_handle))
+	{
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
@@ -129,11 +132,13 @@ static nvm_high_api_status_t read(nvm_device_api_handle *const wl_handle, nvm_da
 static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const nvm_data_t *const user_data)
 {
 	nvm_high_api_status_t retcode = NVM_API_STATUS_OK;
-	if (!is_parameter_valid(wl_handle, (nvm_data_t * const)user_data)) {
+	if (!is_parameter_valid(wl_handle, (nvm_data_t *const)user_data))
+	{
 		retcode = NVM_API_STATUS_INVALID_PARAMETERS;
 	}
 
-	if (!is_initialized(wl_handle)) {
+	if (!is_initialized(wl_handle))
+	{
 		retcode = NVM_API_STATUS_NOT_INITIALIZED;
 	}
 
@@ -141,17 +146,15 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 	const nvm_device_data_t data_device = {
 		.data = *user_data,
 		.checksum = count_checksum(user_data),
-		.memory_flag = NVM_RECORD_VALID
-	};
+		.memory_flag = NVM_RECORD_VALID};
 
 	if (retcode == NVM_API_STATUS_OK)
 	{
-		_MemAddress = (wl_handle-> last_busy_struct_address == LAST_MEM_STRUCT_ADDRESS)?
-					  0x0000 : wl_handle-> last_busy_struct_address+sizeof(nvm_device_data_t);
+		_MemAddress = (wl_handle->last_busy_struct_address == LAST_MEM_STRUCT_ADDRESS) ? 0x0000 : wl_handle->last_busy_struct_address + sizeof(nvm_device_data_t);
 		bool write_ok = false;
-		while(!write_ok && retcode == NVM_API_STATUS_OK)
+		while (!write_ok && retcode == NVM_API_STATUS_OK)
 		{
-			if(_MemAddress + sizeof(nvm_device_data_t) >= wl_handle->device_mem_capacity)
+			if (_MemAddress + sizeof(nvm_device_data_t) >= wl_handle->device_mem_capacity)
 			{
 				if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.erase_all(wl_handle))
 				{
@@ -167,24 +170,23 @@ static nvm_high_api_status_t write(nvm_device_api_handle *const wl_handle, const
 				break;
 			}
 			nvm_device_data_t read_back;
-			if(NVM_DEVICE_STATUS_OK != at24c256n_low_api.read(wl_handle,_MemAddress, (uint8_t *)&read_back, sizeof(nvm_device_data_t)))
+			if (NVM_DEVICE_STATUS_OK != at24c256n_low_api.read(wl_handle, _MemAddress, (uint8_t *)&read_back, sizeof(nvm_device_data_t)))
 			{
 				retcode = NVM_API_STATUS_READ_ERROR;
 				break;
 			}
-			if(is_memory_equal((uint8_t*)&data_device, (uint8_t*)&read_back, sizeof(nvm_device_data_t)))
+			if (!memcmp((uint8_t *)&data_device, (uint8_t *)&read_back, sizeof(nvm_device_data_t)))
 			{
 				write_ok = true;
 			}
 			else
 			{
-				nvm_device_data_t bad_flag ={.memory_flag = NVM_RECORD_BAD};
-				at24c256n_low_api.write(wl_handle, _MemAddress, (uint8_t*)&bad_flag , sizeof(bad_flag));
+				nvm_device_data_t bad_flag = {.memory_flag = NVM_RECORD_BAD};
+				at24c256n_low_api.write(wl_handle, _MemAddress, (uint8_t *)&bad_flag, sizeof(bad_flag));
 				_MemAddress += sizeof(nvm_device_data_t);
 			}
-
 		}
-		if(write_ok)
+		if (write_ok)
 		{
 			wl_handle->data_cache.data = data_device.data;
 			wl_handle->data_cache.is_valid = true;
@@ -221,10 +223,12 @@ static nvm_high_api_status_t last_busy_struct_address(nvm_device_api_handle *con
 			status = NVM_API_STATUS_READ_ERROR;
 			break;
 		}
-		if(data.memory_flag == NVM_RECORD_EMPTY){
+		if (data.memory_flag == NVM_RECORD_EMPTY)
+		{
 			break;
 		}
-		else if(data.memory_flag == NVM_RECORD_BAD){
+		else if (data.memory_flag == NVM_RECORD_BAD)
+		{
 			continue;
 		}
 		if (count_checksum(&data.data) == data.checksum)
@@ -252,7 +256,7 @@ static nvm_high_api_status_t last_busy_struct_address(nvm_device_api_handle *con
 		wl_handle->data_cache.is_valid = false;
 		wl_handle->last_busy_struct_address = LAST_MEM_STRUCT_ADDRESS;
 
-		if(status == NVM_API_STATUS_OK)
+		if (status == NVM_API_STATUS_OK)
 		{
 			wl_handle->initializing_status = NVM_API_STATUS_NO_DATA;
 			status = NVM_API_STATUS_NO_DATA;
@@ -296,13 +300,6 @@ static uint8_t count_checksum(const nvm_data_t *const data)
  * @param size Number of bytes to compare.
  * @return true if both memory blocks are identical, false if there are any differences.
  */
-static bool is_memory_equal(const uint8_t* arg1 , const uint8_t* arg2, uint16_t size)
-{
-	if(!memcmp(arg1,arg2,size)){
-		return true;
-	}
-	return false;
-}
 
 /**
  * @brief Global instance of the NVM High API interface.
